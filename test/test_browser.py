@@ -2,7 +2,7 @@
 """Tests for mechanize.Browser."""
 
 import copy
-import mimetools
+from email.message import Message
 import os
 import re
 from io import BytesIO
@@ -14,14 +14,16 @@ import mechanize._testcase
 from mechanize._gzip import HTTPGzipProcessor, compress_readable_output
 from mechanize._response import test_html_response
 from mechanize.polyglot import (
-        HTTPConnection, iteritems, addinfourl, codepoint_to_chr, unicode_type)
+    HTTPConnection, iteritems, addinfourl, codepoint_to_chr,
+    unicode_type, force_bytes
+)
 
 em_dash = codepoint_to_chr(0x2014)
 
 
 # XXX these 'mock' classes are badly in need of simplification / removal
 # (note this stuff is also used by test_useragent.py and test_browser.doctest)
-class MockMethod:
+class MockMethod(object):
     def __init__(self, meth_name, action, handle):
         self.meth_name = meth_name
         self.handle = handle
@@ -36,6 +38,8 @@ class MockHeaders(dict):
         name = name.lower()
         return [v for k, v in iteritems(self) if name == k.lower()]
 
+    get_all = getheaders
+
     def __delitem__(self, k):
         kmap = {q.lower(): q for q in self}
         k = kmap.get(k.lower())
@@ -43,12 +47,12 @@ class MockHeaders(dict):
             dict.__delitem__(self, k)
 
 
-class MockResponse:
+class MockResponse(object):
     closeable_response = None
 
     def __init__(self, url="http://example.com/", data=None, info=None):
         self.url = self._url = url
-        self.fp = BytesIO(data)
+        self.fp = BytesIO(force_bytes(data))
         if info is None:
             info = {}
         self._info = self._headers = MockHeaders(info)
@@ -212,8 +216,8 @@ class BrowserTests(TestCase):
             ("Content-Type: text/html; charset=UTF-8\r\n"
              "Content-Type: text/html; charset=KOI8-R\r\n\r\n", "UTF-8"),
         ]:
-            msg = mimetools.Message(BytesIO(s))
-            r = addinfourl(BytesIO(""), msg, "http://www.example.com/")
+            msg = Message(BytesIO(force_bytes(s)))
+            r = addinfourl(BytesIO(b""), msg, "http://www.example.com/")
             b.set_response(r)
             self.assertEqual(b.encoding(), ct)
 
@@ -786,23 +790,24 @@ class ResponseTests(TestCase):
         br.add_handler(make_mock_handler()([("http_open", r)]))
 
         r = br.open(url)
-        self.assertEqual(r.read(), html)
+        self.assertEqual(r.read(), force_bytes(html))
         r.seek(0)
-        self.assertEqual(copy.copy(r).read(), html)
+        self.assertEqual(copy.copy(r).read(), force_bytes(html))
         self.assertEqual(list(br.links())[0].url, "spam")
 
         newhtml = """<html><body><a href="eggs">click me</a></body></html>"""
 
         r.set_data(newhtml)
-        self.assertEqual(r.read(), newhtml)
-        self.assertEqual(br.response().read(), html)
+        self.assertEqual(r.read(), force_bytes(newhtml))
+        self.assertEqual(br.response().read(),
+                         force_bytes(html))
         br.response().set_data(newhtml)
-        self.assertEqual(br.response().read(), html)
+        self.assertEqual(br.response().read(), force_bytes(html))
         self.assertEqual(list(br.links())[0].url, "spam")
         r.seek(0)
 
         br.set_response(r)
-        self.assertEqual(br.response().read(), newhtml)
+        self.assertEqual(br.response().read(), force_bytes(newhtml))
         self.assertEqual(list(br.links())[0].url, "eggs")
 
     def test_select_form(self):
@@ -812,9 +817,9 @@ class ResponseTests(TestCase):
             <form name="a"></form>
             <form name="b" data-ac="123"></form>
             <form name="c" class="x"></form>
-            </html>''')
-        headers = mimetools.Message(
-            BytesIO("Content-type: text/html"))
+            </html>'''.encode('utf-8'))
+        headers = Message(
+            BytesIO("Content-type: text/html".encode('utf-8')))
         response = _response.response_seek_wrapper(
             _response.closeable_response(fp, headers, "http://example.com/",
                                          200, "OK"))
@@ -835,12 +840,13 @@ class ResponseTests(TestCase):
         br = TestBrowser()
         self.assertEqual(str(br), "<TestBrowser (not visiting a URL)>")
 
-        fp = BytesIO('<html><form name="f"><input /></form></html>')
-        headers = mimetools.Message(
-            BytesIO("Content-type: text/html"))
+        fp = BytesIO('<html><form name="f"><input /></form></html>'.encode('utf-8'))
+        headers = Message(
+            BytesIO("Content-type: text/html".encode('utf-8')))
         response = _response.response_seek_wrapper(
-            _response.closeable_response(fp, headers, "http://example.com/",
-                                         200, "OK"))
+            _response.closeable_response(
+                fp, headers, "http://example.com/",
+                200, "OK"))
         br.set_response(response)
         self.assertEqual(str(br), "<TestBrowser visiting http://example.com/>")
 
@@ -868,7 +874,7 @@ class HttplibTests(mechanize._testcase.TestCase):
 
         def getresponse(self_):
             class Response(object):
-                msg = mimetools.Message(BytesIO(""))
+                msg = Message(BytesIO(b""))
                 status = 200
                 reason = "OK"
 

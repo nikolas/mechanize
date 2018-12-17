@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 """HTTP related handlers.
 
 Note that some other HTTP handlers live in more specific modules: _auth.py,
@@ -12,7 +14,7 @@ COPYING.txt included with the distribution).
 
 """
 
-from __future__ import absolute_import
+
 
 import logging
 import socket
@@ -176,7 +178,8 @@ class HTTPRobotRulesProcessor(BaseHandler):
                 request,
                 request.get_full_url(),
                 403, msg,
-                self.http_response_class(BytesIO()), BytesIO(msg))
+                self.http_response_class(
+                    BytesIO()), BytesIO(msg.encode('utf-8')))
 
     https_request = http_request
 

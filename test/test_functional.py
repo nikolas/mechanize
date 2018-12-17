@@ -470,9 +470,9 @@ class ResponseTests(TestCase):
         self.assertEqual(br.response().get_data(), data)
 
     def hidden_test_close_pickle_load(self):
-        print ("Test test_close_pickle_load is expected to fail unless Python "
-               "standard library patch http://python.org/sf/1144636 has been "
-               "applied")
+        print("Test test_close_pickle_load is expected to fail unless Python "
+              "standard library patch http://python.org/sf/1144636 has been "
+              "applied")
         import pickle
 
         b = self.make_browser()

@@ -445,3 +445,6 @@ class TestProgram(unittest.TestProgram):
 
 
 main = TestProgram
+
+if __name__ == '__main__':
+    main(sys.argv)

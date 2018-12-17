@@ -1,8 +1,10 @@
+from __future__ import unicode_literals
+
 """Tests for _clientcookie."""
 
 import errno
 import inspect
-import mimetools
+from email.message import Message
 import os
 import re
 import sys
@@ -24,8 +26,8 @@ class FakeResponse:
         """
         headers: list of RFC822-style 'Key: value' strings
         """
-        f = BytesIO("\n".join(headers))
-        self._headers = mimetools.Message(f)
+        f = BytesIO(b"\n".join(headers))
+        self._headers = Message(f)
         self._url = url
 
     def info(self):

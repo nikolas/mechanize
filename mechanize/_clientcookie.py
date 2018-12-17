@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import re
 import time
 from .polyglot import (
@@ -15,6 +13,10 @@ __all__ = [
     'request_port', 'LWPCookieJar', 'LoadError', 'reach', 'FileCookieJar',
     'lwp_cookie_str', 'domain_match', 'request_path', 'user_domain_match'
 ]
+
+
+def cmp(a, b):
+    return (a > b) - (a < b)
 
 
 def effective_request_host(request):

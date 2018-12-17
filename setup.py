@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 """Stateful programmatic web browsing.
 
 Stateful programmatic web browsing, after Andy Lester's Perl module
@@ -28,9 +28,6 @@ import sys
 
 if sys.version_info < (2, 7):
     raise SystemExit('mechanize requires python >= 2.7')
-
-if sys.version_info.major > 2:
-    raise SystemExit('mechanize only works on python 2.x')
 
 VERSION = open(os.path.join("mechanize", "_version.py")).\
     readlines()[0].strip(' "\n')
@@ -73,7 +70,7 @@ def main():
         version=VERSION,
         license="BSD",
         platforms=["any"],
-        install_requires=['html5lib>=0.999999999'],
+        install_requires=['html5lib>=0.999999999', 'six'],
         extras_require={'fast': ['html5-parser>=0.4.4']},
         classifiers=[c for c in CLASSIFIERS.split("\n") if c],
         zip_safe=True,

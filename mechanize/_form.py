@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import re
 from collections import defaultdict
@@ -13,7 +13,7 @@ class SkipControl(ValueError):
 
 
 def normalize_line_endings(text):
-    return re.sub(ur"(?:(?<!\r)\n)|(?:\r(?!\n))", u"\r\n", text)
+    return re.sub(r"(?:(?<!\r)\n)|(?:\r(?!\n))", "\r\n", text)
 
 
 def label_text(elem):
@@ -66,7 +66,7 @@ def parse_option(elem, parent_of, attrs_map):
 def parse_textarea(elem, parent_of, *a):
     ctype, name, attrs = parse_control(elem, parent_of)
     ctype = 'textarea'
-    attrs['value'] = normalize_line_endings(elem.text or u'')
+    attrs['value'] = normalize_line_endings(elem.text or '')
     return ctype, name, attrs
 
 

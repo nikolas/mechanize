@@ -8,7 +8,7 @@ COPYING.txt included with the distribution).
 
 """
 
-from __future__ import absolute_import
+
 
 import bisect
 import os

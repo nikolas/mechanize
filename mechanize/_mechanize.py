@@ -8,7 +8,7 @@ under the terms of the BSD or ZPL 2.1 licenses (see the file COPYING.txt
 included with the distribution).
 
 """
-from __future__ import absolute_import
+
 
 import copy
 import os
@@ -42,7 +42,7 @@ def sanepathname2url(path):
     return urlpath
 
 
-class History:
+class History(object):
     """
 
     Though this will become public, the implied interface is not yet stable.
@@ -306,7 +306,7 @@ class Browser(UserAgentBase):
             response = _response.upgrade_response(response)
 
         if not success:
-            raise response
+            raise Exception
         return response
 
     def __str__(self):

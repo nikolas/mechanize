@@ -7,7 +7,7 @@ under the terms of the BSD or ZPL 2.1 licenses (see the file
 COPYING.txt included with the distribution).
 """
 
-from __future__ import absolute_import
+
 
 import re
 import time

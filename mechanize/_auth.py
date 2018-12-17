@@ -9,7 +9,7 @@ included with the distribution).
 
 """
 
-from __future__ import absolute_import
+
 from ._urllib2_fork import HTTPPasswordMgr
 from .polyglot import is_string, iteritems
 

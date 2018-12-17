@@ -12,10 +12,10 @@ included with the distribution).
 
 # XXX Wow, this is ugly.  Overly-direct translation of the RFC ATM.
 
-from __future__ import absolute_import
+
 import re
 
-from .polyglot import quote
+from .polyglot import quote, is_py2, force_bytes
 # def chr_range(a, b):
 # return "".join(map(chr, range(ord(a), ord(b)+1)))
 
@@ -38,13 +38,13 @@ def clean_url(url, encoding='utf-8'):
     # - Mozilla/Firefox will send you latin-1 if there's no non latin-1
     # characters in your link. It will send you utf-8 however if there are...
     is_unicode = not isinstance(url, bytes)
-    if not is_unicode:
+    if is_py2 and not is_unicode:
         url = url.decode(encoding, "replace")
     url = url.strip()
     # for second param to urllib.quote(), we want URI_CHARS, minus the
     # 'always_safe' characters that urllib.quote() never percent-encodes
-    ans = quote(url.encode(encoding), "!*'();:@&=+$,/?%#[]~")
-    if is_unicode:
+    ans = quote(force_bytes(url), "!*'();:@&=+$,/?%#[]~")
+    if is_py2 and is_unicode:
         ans = ans.decode(encoding)
     return ans
 

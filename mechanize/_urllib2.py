@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 # urllib2 work-alike interface
 # ...from urllib2...
 from .polyglot import HTTPError, URLError

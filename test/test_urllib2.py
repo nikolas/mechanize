@@ -136,7 +136,7 @@ def test_request_headers_methods():
 
     >>> r.has_header("Not-there")
     False
-    >>> print r.get_header("Not-there")
+    >>> print(r.get_header("Not-there"))
     None
     >>> r.get_header("Not-there", "default")
     'default'
@@ -291,7 +291,7 @@ def http_message(mapping):
     for kv in iteritems(mapping):
         f.append("%s: %s" % kv)
     f.append("")
-    msg = HTTPMessage(BytesIO("\r\n".join(f)))
+    msg = HTTPMessage(BytesIO("\r\n".join(f).encode('utf-8')))
     return msg
 
 
@@ -438,13 +438,13 @@ class MockHTTPHandler(mechanize.BaseHandler):
         self.requests = []
 
     def http_open(self, req):
-        import mimetools
+        from email.message import Message
         import copy
         self.requests.append(copy.deepcopy(req))
         if self._count == 0:
             self._count = self._count + 1
             name = "Not important"
-            msg = mimetools.Message(BytesIO(self.headers))
+            msg = Message(BytesIO(self.headers.encode('utf-8')))
             return self.parent.error("http", req,
                                      test_response(), self.code, name, msg)
         else:
@@ -1236,12 +1236,12 @@ class HandlerTests(mechanize._testcase.TestCase):
                 self.requests = []
 
             def http_open(self, req):
-                import mimetools
+                from email.message import Message
                 import copy
                 self.requests.append(copy.deepcopy(req))
                 if req.get_full_url() == "http://example.com/robots.txt":
                     hdr = "Location: http://example.com/en/robots.txt\r\n\r\n"
-                    msg = mimetools.Message(BytesIO(hdr))
+                    msg = Message(BytesIO(hdr))
                     return self.parent.error("http", req,
                                              test_response(), 302, "Blah", msg)
                 else:

@@ -28,14 +28,14 @@ COPYING.txt included with the distribution).
 # complex proxies  XXX not sure what exactly was meant by this
 # abstract factory for opener
 
-from __future__ import absolute_import
+
 
 import base64
 import bisect
 import copy
 import hashlib
 import logging
-import mimetools
+from email.message import Message
 import os
 import platform
 import posixpath
@@ -46,20 +46,36 @@ import sys
 import time
 from functools import partial
 # support for FileHandler, proxies via environment variables
-from urllib import (addinfourl, ftpwrapper, getproxies, splitattr, splitpasswd,
-                    splitport, splittype, splituser, splitvalue, unquote,
-                    unwrap, url2pathname, proxy_bypass as urllib_proxy_bypass,
-                    splithost as urllib_splithost)
 
-from . import _rfc3986
+try:
+    from urllib.request import (
+        addinfourl, ftpwrapper, getproxies, splitattr, splitpasswd,
+        splitport, splittype, splituser, splitvalue, unquote,
+        unwrap, url2pathname, proxy_bypass as urllib_proxy_bypass,
+        splithost as urllib_splithost
+    )
+except ImportError:
+    from urllib import (
+        addinfourl, ftpwrapper, getproxies, splitattr, splitpasswd,
+        splitport, splittype, splituser, splitvalue, unquote,
+        unwrap, url2pathname, proxy_bypass as urllib_proxy_bypass,
+        splithost as urllib_splithost
+    )
+
+from mechanize import _rfc3986
 from ._clientcookie import CookieJar
 from ._response import closeable_response
 from ._headersutil import normalize_header_name
 from .polyglot import (
         HTTPError, URLError, HTTPConnection, HTTPSConnection, urlparse,
         urlsplit, is_class, iteritems, is_string, raise_with_traceback,
-        StringIO, map
+        StringIO
 )
+
+try:
+    from .polyglot import map
+except ImportError:
+    pass
 
 
 def sha1_digest(bytes):
@@ -265,7 +281,7 @@ class Request:
         return list(iteritems(hdrs))
 
 
-class OpenerDirector:
+class OpenerDirector(object):
 
     def __init__(self):
         client_version = "Python-urllib/%s" % __version__
@@ -1112,7 +1128,8 @@ class AbstractHTTPHandler(BaseHandler):
         http_class must implement the HTTPConnection API from httplib.
         The addinfourl return value is a file-like object.  It also
         has methods and attributes including:
-            - info(): return a mimetools.Message object for the headers
+            - info(): return a email.message.Message object
+              for the headers
             - geturl(): return the original request URL
             - code: HTTP status code
         """
@@ -1352,7 +1369,7 @@ class FileHandler(BaseHandler):
             size = stats.st_size
             modified = emailutils.formatdate(stats.st_mtime, usegmt=True)
             mtype = mimetypes.guess_type(file)[0]
-            headers = mimetools.Message(StringIO(
+            headers = Message(StringIO(
                 'Content-type: %s\nContent-length: %d\nLast-modified: %s\n' %
                 (mtype or 'text/plain', size, modified)))
             if host:
@@ -1418,7 +1435,7 @@ class FTPHandler(BaseHandler):
             if retrlen is not None and retrlen >= 0:
                 headers += "Content-length: %d\n" % retrlen
             sf = StringIO(headers)
-            headers = mimetools.Message(sf)
+            headers = Message(sf)
             return addinfourl(fp, headers, req.get_full_url())
         except ftplib.all_errors as msg:
             raise_with_traceback(URLError('ftp error: %s' % msg))

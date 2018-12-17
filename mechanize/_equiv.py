@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=utf-8
 # License: BSD Copyright: 2017, Kovid Goyal <kovid at kovidgoyal.net>
 
@@ -11,7 +11,7 @@ import string
 from ._entities import html5_entities
 from .polyglot import codepoint_to_chr
 
-space_chars = frozenset(("\t", "\n", "\u000C", " ", "\r"))
+space_chars = frozenset(("\t", "\n", "\\u000C", " ", "\r"))
 space_chars_bytes = frozenset(item.encode("ascii") for item in space_chars)
 ascii_letters_bytes = frozenset(
     item.encode("ascii") for item in string.ascii_letters)
@@ -75,7 +75,7 @@ class Bytes(bytes):
             raise TypeError
         return self[p:p + 1]
 
-    def next(self):
+    def __next__(self):
         # Py2 compat
         return self.__next__()
 

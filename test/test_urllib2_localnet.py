@@ -2,7 +2,7 @@
 
 """Functional tests from the Python standard library test suite."""
 
-import mimetools
+from email.message import Message
 import threading
 import mechanize
 import unittest
@@ -492,9 +492,9 @@ class TestUrlopen(TestCase):
 
         open_url = mechanize.urlopen("http://localhost:%s" % handler.port)
         info_obj = open_url.info()
-        self.assertTrue(isinstance(info_obj, mimetools.Message),
+        self.assertTrue(isinstance(info_obj, Message),
                         "object returned by 'info' is not an instance of "
-                        "mimetools.Message")
+                        "Message")
         self.assertEqual(info_obj.getsubtype(), "plain")
 
     def test_geturl(self):

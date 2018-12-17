@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 """Response classes.
 
 The seek_wrapper code is not used if you're using UserAgent with
@@ -16,14 +18,14 @@ included with the distribution).
 
 """
 
-from __future__ import absolute_import
+
 from functools import partial
 import copy
-import mimetools
+from email.message import Message
 from io import BytesIO
 
 from ._headersutil import normalize_header_name
-from .polyglot import HTTPError
+from .polyglot import HTTPError, force_bytes
 
 
 def len_of_seekable(file_):
@@ -298,7 +300,7 @@ class response_seek_wrapper(seek_wrapper):
         self.read()
         self.close()
         cache = self._seek_wrapper__cache = BytesIO()
-        cache.write(data)
+        cache.write(force_bytes(data))
         self.seek(0)
 
 
@@ -474,7 +476,9 @@ def make_response(data, headers, url, code, msg):
 
     """
     mime_headers = make_headers(headers)
-    r = closeable_response(BytesIO(data), mime_headers, url, code, msg)
+    r = closeable_response(
+        BytesIO(force_bytes(data)),
+        mime_headers, url, code, msg)
     return response_seek_wrapper(r)
 
 
@@ -485,7 +489,8 @@ def make_headers(headers):
     hdr_text = []
     for name_value in headers:
         hdr_text.append("%s: %s" % name_value)
-    return mimetools.Message(BytesIO("\n".join(hdr_text)))
+    s = "\n".join(hdr_text)
+    return Message(BytesIO(force_bytes(s)))
 
 
 # Rest of this module is especially horrible, but needed, at least until fork

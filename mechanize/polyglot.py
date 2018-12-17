@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # vim:fileencoding=utf-8
 # License: GPLv3 Copyright: 2018, Kovid Goyal <kovid at kovidgoyal.net>
 
@@ -10,42 +10,41 @@ import sys
 is_py2 = sys.version_info.major < 3
 
 if is_py2:
-    import types
     from urllib import (
             urlencode, pathname2url, quote, addinfourl, quote_plus, urlopen
     )
     from urllib2 import (
             HTTPError, URLError, install_opener, build_opener, ProxyHandler
     )
-    from robotparser import RobotFileParser
-    from urlparse import urlsplit, urljoin, urlparse, urlunparse
-    from httplib import HTTPMessage, HTTPConnection, HTTPSConnection
-    from cookielib import (
+    from urllib.robotparser import RobotFileParser
+    from urllib.parse import urlsplit, urljoin, urlparse, urlunparse
+    from http.client import HTTPMessage, HTTPConnection, HTTPSConnection
+    from http.cookiejar import (
             DEFAULT_HTTP_PORT, CookiePolicy, DefaultCookiePolicy,
             FileCookieJar, LoadError, LWPCookieJar, _debug, domain_match,
             eff_request_host, escape_path, is_HDN, lwp_cookie_str, reach,
             request_path, request_port, user_domain_match, Cookie, CookieJar,
             MozillaCookieJar, request_host)
-    from cStringIO import StringIO
+
     from future_builtins import map  # noqa
 
     def is_string(x):
-        return isinstance(x, basestring)
+        return isinstance(x, str)
 
     def iteritems(x):
-        return x.iteritems()
+        return iter(x.items())
 
     def itervalues(x):
-        return x.itervalues()
+        return iter(x.values())
 
     def is_class(obj):
-        return isinstance(obj, (types.ClassType, type))
+        return isinstance(obj, type)
 
     def raise_with_traceback(exc):
         exec('raise exc, None, sys.exc_info()[2]')
 
-    codepoint_to_chr = unichr
-    unicode_type = unicode
+    codepoint_to_chr = chr
+    unicode_type = str
 
 
 else:
@@ -64,16 +63,15 @@ else:
             eff_request_host, escape_path, is_HDN, lwp_cookie_str, reach,
             request_path, request_port, user_domain_match, Cookie, CookieJar,
             MozillaCookieJar, request_host)
-    from io import StringIO
 
     def is_string(x):
         return isinstance(x, str)
 
     def iteritems(x):
-        return x.items()
+        return list(x.items())
 
     def itervalues(x):
-        return x.values()
+        return list(x.values())
 
     def is_class(obj):
         return isinstance(obj, type)
@@ -83,6 +81,16 @@ else:
 
     codepoint_to_chr = chr
     unicode_type = str
+
+
+def force_bytes(s, encoding='utf-8'):
+    if not isinstance(s, bytes):
+        return s.encode(encoding)
+    return s
+
+
+from io import StringIO
+
 
 if False:
     HTTPError, urlsplit, urljoin, urlparse, urlunparse, urlencode, HTTPMessage

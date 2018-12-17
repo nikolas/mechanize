@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import struct
 import zlib
@@ -10,7 +10,7 @@ from .polyglot import is_py2
 
 CRC_MASK = 0xffffffff
 if is_py2:
-    CRC_MASK = long(CRC_MASK)
+    CRC_MASK = int(CRC_MASK)
 
 
 def gzip_prefix():
@@ -141,7 +141,7 @@ class UnzipWrapper:
         if ans:
             yield ans
 
-    def next(self):
+    def __next__(self):
         ans = self.readline()
         if not ans:
             raise StopIteration()
@@ -191,7 +191,7 @@ class HTTPGzipProcessor(BaseHandler):
             if sum('gzip' in x for x in existing) < 1:
                 existing.append('gzip')
                 request.add_header("Accept-Encoding",
-                                   ', '.join(filter(None, existing)))
+                                   ', '.join([_f for _f in existing if _f]))
         return request
 
     def http_response(self, request, response):

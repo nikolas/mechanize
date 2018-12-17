@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 import codecs
 import copy
@@ -35,8 +35,8 @@ def iterlinks(root, base_url):
             if val:
                 url = clean_url(val)
                 yield Link(base_url, url,
-                           compress_whitespace(u''.join(elem_text(tag))), q,
-                           tag.items())
+                           compress_whitespace(''.join(elem_text(tag))), q,
+                           list(tag.items()))
         elif q == 'base':
             href = tag.get('href')
             if href:
@@ -51,8 +51,8 @@ def get_encoding_from_response(response, verify=True):
     # HTTPEquivProcessor may be in use, so both HTTP and HTTP-EQUIV
     # headers may be in the response.  HTTP-EQUIV headers come last,
     # so try in order from first to last.
-    if response:
-        for ct in response.info().getheaders("content-type"):
+    if response and response.info().get('content-type'):
+        for ct in response.info().get_all("content-type"):
             for k, v in split_header_words([ct])[0]:
                 if k == "charset":
                     if not verify:
@@ -77,7 +77,7 @@ class ResponseTypeFinder:
         self._allow_xhtml = allow_xhtml
 
     def is_html(self, response, encoding):
-        ct_hdrs = response.info().getheaders("content-type")
+        ct_hdrs = response.info().get_all("content-type")
         url = response.geturl()
         # XXX encoding
         return _is_html(ct_hdrs, url, self._allow_xhtml)
@@ -258,7 +258,7 @@ class Factory:
         if self._current_title is lazy:
             self._current_title = get_title(
                 self.root) if self.root is not None else None
-        return self._current_title or u''
+        return self._current_title or ''
 
     @property
     def global_form(self):
